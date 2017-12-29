@@ -19,7 +19,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for wineries" aria-label="Search for wineries">
+                    <input type="text" class="form-control" placeholder="Search for wineries" aria-label="Search for wineries" data-bind="value: query, valueUpdate: 'keyup'">
                     <span class="input-group-btn">
                         <button class="btn btn-secondary" type="button">Search</button>
                     </span>
@@ -31,7 +31,7 @@
     <div class="container">
         <div class="row">
             <div class="col-12 col-lg-3">
-                <ul class="list-group" data-bind="foreach: wineryList">
+                <ul class="list-group" data-bind="foreach: filteredLocations">
                     <li class="list-group-item" data-bind="text: name, click: $parent.showMarker"></li>
                 </ul>
             </div>

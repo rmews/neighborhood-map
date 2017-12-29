@@ -207,7 +207,8 @@ function markerBounce(marker) {
 
 // Our winery object.
 var Winery = function(data) {
-    this.name = data.name;
+    // make name observable for query.
+    this.name = ko.observable(data.name);
     this.address = data.address;
     this.location = data.location;
     this.marker = data.marker;
@@ -226,10 +227,10 @@ var ViewModel = function() {
         self.wineryList.push(new Winery(winery));
     });
 
-    // observe the wine locations.
+    // currently selected winery
     this.currentWinery = ko.observable(this.wineryList()[0]);
 
-    // set the current winery based on click.
+    // function to listen for click event
     this.setWinery = function(clickedWinery) {
         self.currentWinery(clickedWinery);
     };
@@ -238,4 +239,17 @@ var ViewModel = function() {
     this.showMarker = function(location) {
         google.maps.event.trigger(location.marker, 'click');
     };
+
+    // set empty observable to wait for search query.
+    this.query = ko.observable('');
+
+    // filter the list based on observable name from input box.
+    // credit https://stackoverflow.com/questions/47741328/filtering-list-with-knockout.
+    this.filteredLocations = ko.computed(function() {
+        if (!self.query()) {
+            return self.wineryList();
+        } else {
+            return self.wineryList().filter(location => location.name().toLowerCase().indexOf(self.query().toLowerCase()) > -1);
+        }
+    });
 };
