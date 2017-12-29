@@ -1,38 +1,49 @@
-// Model
+//////////////////// Model ////////////////////
 
-// These are winery locations
+// These are winery locations.
 // Normally these would be loaded from a server-side code.
+// the id is a Foursquare id for use in showing Foursquare venue info
 var wineries = [
     {
+        id: '4b1e9c1ef964a520841c24e3',
         name: 'Cakebread Cellars',
+        address: '8300 St. Helena Hwy, Rutherford, CA 94573',
         location: {
             lat: 38.447749,
             lng: -122.411996
         }
     },
     {
+        id: '4bd226a0046076b0505d7371',
         name: 'Schweiger Vineyards',
+        address: '4015 Spring Mountain Rd, Saint Helena, CA 94574',
         location: {
             lat: 38.526677,
             lng: -122.544967
         }
     },
     {
+        id: '4b7f516cf964a520322730e3',
         name: 'VIADER Vineyards & Winery',
+        address: '1120 Deer Park Rd, Deer Park, CA 94576',
         location: {
             lat: 38.559242,
             lng: -122.473520
         }
     },
     {
+        id: '4ad648b5f964a520510621e3',
         name: 'Ledson Winery and Vineyards',
+        address: '7335 Sonoma Hwy, Kenwood, CA 95409',
         location: {
             lat: 38.441556,
             lng: -122.586264
         }
     },
     {
+        id: '4bfeee674e5d0f4754627d1f',
         name: 'Hanzell Vineyards',
+        address: 'Sonoma, CA 95476',
         location: {
             lat: 38.313342,
             lng: -122.462341
@@ -45,63 +56,156 @@ var Winery = function(data) {
 };
 
 
-////////// Google Maps API /////////
+//////////////////// Google Maps API ///////////////////
 
-// global map variable
+// global map variable to use outside our intialize map function.
 var map;
 
-// blank array for map markers
+// global markers array to use outside our initialize map function.
+// It is empty now, but we will loop through our model to populate the markers.
 var markers = [];
 
-// initialize map
+// initialize the map canvas.
 function initMap() {
-    // Constructor creates a new map
+    // Constructor creates a new map.
     map = new google.maps.Map(document.getElementById('map'), {
-        // center the map
+        // center the map.
         center: {
             lat: 38.297539,
             lng: -122.286865
         },
-        // set zoom level for map
+        // set zoom level for map.
         zoom: 10
     });
 
+    // set boundry for map.
     var bounds = new google.maps.LatLngBounds();
+    // initialize info window.
+    var infowindow = new google.maps.InfoWindow();
 
-    // loop through locations and set markers
+    // loop through locations and set markers.
     for (var i = 0; i < wineries.length; i++) {
-        // Get the location and name from wineries array.
         var location = wineries[i].location;
         var name = wineries[i].name;
+        var address = wineries[i].address;
+        var id = wineries[i].id;
 
         // Create a marker per location, and put into markers array.
         var marker = new google.maps.Marker({
             map: map,
             position: location,
             title: name,
+            address: address,
+            id: id,
             animation: google.maps.Animation.DROP
           });
 
         // Push the marker to the array of markers.
         markers.push(marker);
 
-        // extend boundries of map for each marker
+        // extend boundries of map for each marker.
         bounds.extend(markers[i].position);
+
+        // Create an onclick event to open an infowindow at each marker.
+        marker.addListener('click', function() {
+            markerBounce(this, marker);
+            populateInfoWindow(this, infowindow);
+        });
     }
-    // Extend the boundaries of the map for each marker
+    // Extend the boundaries of the map for each marker.
     map.fitBounds(bounds);
 }
 
+// This function populates the infowindow when the marker is clicked.
+// Populate info based on the markers position.
+function populateInfoWindow(marker, infowindow) {
+    // Check to make sure the infowindow is not already opened on this marker.
+    if (infowindow.marker != marker) {
+        // set infowindow to marker being called
+        infowindow.marker = marker;
 
-////////// View Model //////////
+        // Foursquare API
+        var clientID = '4CL4BEGBPOTRVNIWQWBBAD13SHIVJXM3OBBTIUMHGFGZY3FW';
+        var clientSecret = 'QQZNO4MRVWQZVCMPBZGHPZ51SUASOJBZD1WWNYVZW41GTJND';
+        var version = '20170801';
+        var id = marker.id;
+        var url = 'https://api.foursquare.com/v2/venues/';
+        url += id;
+        url += '?' + $.param({
+            'client_id': clientID,
+            'client_secret': clientSecret,
+            'v': version
+        });
+
+        // Parse Foursquare JSON data
+        $.ajax({
+            url: url,
+            success: function(data) {
+                // get foursquare rating
+                marker.rating = data.response.venue.rating;
+                // construct url for image
+                marker.photo = data.response.venue.bestPhoto.prefix + "80x80" + data.response.venue.bestPhoto.suffix;
+                infowindow.setContent('<div class="container">' +
+                                        '<div class="row">' +
+                                            '<h5>' + marker.title + '</h5>' +
+                                        '</div>' +
+                                        '<div class="row">' +
+                                            '<p>' + marker.address + '</p>' +
+                                        '</div>' +
+                                        '<div class="row">' +
+                                            '<p>Foursquare Rating: ' + marker.rating + '</p>' +
+                                        '</div>' +
+                                        '<div class="row">' +
+                                            '<img src="' + marker.photo + '" class="img-thumbnail">' +
+                                        '</div>' +
+                                    '</div>');
+                infowindow.open(map, marker);
+            },
+            error: function(error) {
+                infowindow.setContent('<div class="container">' +
+                                        '<div class="row">' +
+                                            '<h5>' + marker.title + '</h5>' +
+                                        '</div>' +
+                                        '<div class="row">' +
+                                            '<p>' + marker.address + '</p>' +
+                                        '</div>' +
+                                        '<div class="row">' +
+                                            '<p>Foursquare Rating: Sorry...Foursquare cannot be reached right now</p>' +
+                                        '</div>' +
+                                    '</div>');
+                infowindow.open(map, marker);
+            }
+        });
+
+        // Make sure the marker property is cleared if the infowindow is closed.
+        infowindow.addListener('closeclick', function() {
+            infowindow.setMarker = null;
+        });
+    }
+}
+
+// This function makes the marker bounce when called.
+function markerBounce(marker) {
+    if (marker.getAnimation() === null) {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() {
+            marker.setAnimation(null);
+        }, 1500);
+    } else {
+        marker.setAnimation(google.maps.Animation.NULL);
+    }
+};
+
+
+//////////////////// View Model ////////////////////
 
 var ViewModel = function() {
     var self = this;
 
-    // set empty observable array
+    // set empty observable array.
     self.wineryList = ko.observableArray([]);
 
-    // call on the locations and push to observable array
+    // call on the locations and push to observable array.
     wineries.forEach(function(winery) {
         self.wineryList.push(new Winery(winery));
     });
