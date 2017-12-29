@@ -51,17 +51,14 @@ var wineries = [
     }
 ];
 
-var Winery = function(data) {
-    this.name = data.name;
-};
-
 
 //////////////////// Google Maps API ///////////////////
 
 // global map variable to use outside our intialize map function.
 var map;
 
-// global markers array to use outside our initialize map function.
+// global markers array to use outside initialize map function.
+// used primaryly for extending the map bounds.
 // It is empty now, but we will loop through our model to populate the markers.
 var markers = [];
 
@@ -78,19 +75,20 @@ function initMap() {
         zoom: 10
     });
 
-    // set boundry for map.
+    // initialize boundry method for map.
     var bounds = new google.maps.LatLngBounds();
-    // initialize info window.
+
+    // initialize info window for markers.
     var infowindow = new google.maps.InfoWindow();
 
-    // loop through locations and set markers.
+    // loop through locations and set marker properties.
     for (var i = 0; i < wineries.length; i++) {
         var location = wineries[i].location;
         var name = wineries[i].name;
         var address = wineries[i].address;
         var id = wineries[i].id;
 
-        // Create a marker per location, and put into markers array.
+        // Create a marker object per location.
         var marker = new google.maps.Marker({
             map: map,
             position: location,
@@ -100,11 +98,15 @@ function initMap() {
             animation: google.maps.Animation.DROP
           });
 
+        // Add marker property to winery object.
+        wineries[i].marker = marker;
+
         // Push the marker to the array of markers.
         markers.push(marker);
 
         // extend boundries of map for each marker.
         bounds.extend(markers[i].position);
+        // bounds.extend(marker.position);
 
         // Create an onclick event to open an infowindow at each marker.
         marker.addListener('click', function() {
@@ -112,9 +114,14 @@ function initMap() {
             populateInfoWindow(this, infowindow);
         });
     }
+
     // Extend the boundaries of the map for each marker.
     map.fitBounds(bounds);
-}
+
+    // call the view model once map has been and markers have been initialized.
+    ko.applyBindings(new ViewModel());
+};
+
 
 // This function populates the infowindow when the marker is clicked.
 // Populate info based on the markers position.
@@ -161,6 +168,8 @@ function populateInfoWindow(marker, infowindow) {
                                     '</div>');
                 infowindow.open(map, marker);
             },
+            // handle error with calling Foursquare API.
+            // we still display the title and address, but display error message.
             error: function(error) {
                 infowindow.setContent('<div class="container">' +
                                         '<div class="row">' +
@@ -196,19 +205,37 @@ function markerBounce(marker) {
     }
 };
 
+// Our winery object.
+var Winery = function(data) {
+    this.name = data.name;
+    this.address = data.address;
+    this.location = data.location;
+    this.marker = data.marker;
+};
 
 //////////////////// View Model ////////////////////
 
 var ViewModel = function() {
     var self = this;
 
-    // set empty observable array.
-    self.wineryList = ko.observableArray([]);
+    // set empty observable array on our wine locations.
+    this.wineryList = ko.observableArray([]);
 
     // call on the locations and push to observable array.
     wineries.forEach(function(winery) {
         self.wineryList.push(new Winery(winery));
     });
-};
 
-ko.applyBindings(new ViewModel());
+    // observe the wine locations.
+    this.currentWinery = ko.observable(this.wineryList()[0]);
+
+    // set the current winery based on click.
+    this.setWinery = function(clickedWinery) {
+        self.currentWinery(clickedWinery);
+    };
+
+    // display marker based on selected wine location.
+    this.showMarker = function(location) {
+        google.maps.event.trigger(location.marker, 'click');
+    };
+};
