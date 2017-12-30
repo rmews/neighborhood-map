@@ -48,6 +48,42 @@ var wineries = [
             lat: 38.313342,
             lng: -122.462341
         }
+    },
+    {
+        id: '4a342dd7f964a520da9b1fe3',
+        name: 'Inglenook Vineyards',
+        address: '1991 St. Helena Hwy., Rutherford, CA 94558',
+        location: {
+            lat: 38.4554656,
+            lng: -122.4327571
+        }
+    },
+    {
+        id: '4a624a05f964a520a9c31fe3',
+        name: 'Simi Winery',
+        address: '16275 Healdsburg Ave, Healdsburg, CA 95448',
+        location: {
+            lat: 38.6401875,
+            lng: -122.8580496
+        }
+    },
+    {
+        id: '4bef8b3eada6b713f7562206',
+        name: 'Bravante Vineyards',
+        address: '300 Stone Ridge Rd, Angwin, CA 94508',
+        location: {
+            lat: 38.568529,
+            lng: -122.462370
+        }
+    },
+    {
+        id: '4afdb7faf964a520242a22e3',
+        name: 'Beringer Vineyards',
+        address: '2000 Main St, Saint Helena, CA 94574',
+        location: {
+            lat: 38.510173,
+            lng: -122.479886
+        }
     }
 ];
 
@@ -159,8 +195,9 @@ function populateInfoWindow(marker, infowindow) {
                                         '<div class="row">' +
                                             '<p>' + marker.address + '</p>' +
                                         '</div>' +
-                                        '<div class="row">' +
-                                            '<p>Foursquare Rating: ' + marker.rating + '</p>' +
+                                        '<div class="row">' + (typeof marker.rating !== "undefined" ?
+                                            '<p>Foursquare Rating: ' + marker.rating + '</p>' :
+                                            '<p>Foursquare Rating: no ratings</p>') +
                                         '</div>' +
                                         '<div class="row">' +
                                             '<img src="' + marker.photo + '" class="img-thumbnail">' +
