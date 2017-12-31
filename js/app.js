@@ -280,13 +280,18 @@ var ViewModel = function() {
     // set empty observable to wait for search query.
     this.query = ko.observable('');
 
-    // filter the list based on observable name from input box.
-    // credit https://stackoverflow.com/questions/47741328/filtering-list-with-knockout.
+    // filter the winery list based on observable name from input box
+    // credit for filter function: https://stackoverflow.com/questions/47741328/filtering-list-with-knockout.
+    // credit for sort based on alpha ordering credit: https://stackoverflow.com/questions/12718699/sorting-an-observable-array-in-knockout
     this.filteredLocations = ko.computed(function() {
         if (!self.query()) {
-            return self.wineryList();
+            return self.wineryList().sort(function(l, r) {
+                return l.name() > r.name() ? 1 : -1;
+            });
         } else {
-            return self.wineryList().filter(location => location.name().toLowerCase().indexOf(self.query().toLowerCase()) > -1);
+            return self.wineryList().filter(location => location.name().toLowerCase().indexOf(self.query().toLowerCase()) > -1).sort(function(l, r) {
+                return l.name() > r.name() ? 1 : -1;
+            });
         }
     });
 };
