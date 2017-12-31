@@ -156,7 +156,7 @@ function initMap() {
 
     // call the view model once map has been and markers have been initialized.
     ko.applyBindings(new ViewModel());
-};
+}
 
 
 // This function populates the infowindow when the marker is clicked.
@@ -187,7 +187,7 @@ function populateInfoWindow(marker, infowindow) {
                 // get foursquare rating
                 marker.rating = data.response.venue.rating;
                 // construct url for image
-                marker.photo = data.response.venue.bestPhoto.prefix + "80x80" + data.response.venue.bestPhoto.suffix;
+                marker.photo = data.response.venue.bestPhoto.prefix + '80x80' + data.response.venue.bestPhoto.suffix;
                 infowindow.setContent('<div class="container">' +
                                         '<div class="row">' +
                                             '<h5>' + marker.title + '</h5>' +
@@ -195,7 +195,7 @@ function populateInfoWindow(marker, infowindow) {
                                         '<div class="row">' +
                                             '<p>' + marker.address + '</p>' +
                                         '</div>' +
-                                        '<div class="row">' + (typeof marker.rating !== "undefined" ?
+                                        '<div class="row">' + (typeof marker.rating !== 'undefined' ?
                                             '<p>Foursquare Rating: ' + marker.rating + '</p>' :
                                             '<p>Foursquare Rating: no ratings</p>') +
                                         '</div>' +
@@ -240,7 +240,7 @@ function markerBounce(marker) {
     } else {
         marker.setAnimation(google.maps.Animation.NULL);
     }
-};
+}
 
 // Our winery object.
 var Winery = function(data) {
