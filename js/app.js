@@ -275,7 +275,7 @@ var ViewModel = function() {
 
     // function to listen for click event
     this.setWinery = function(clickedWinery) {
-        self.currentWinery(clickedWinery);
+        self.currentWinery(clickedWinery.marker, infowindow);
     };
 
     // display marker based on selected wine location.
@@ -286,18 +286,21 @@ var ViewModel = function() {
     // set empty observable to wait for search query.
     this.query = ko.observable('');
 
-    // filter the winery list based on observable name from input box
-    // credit for filter function: https://stackoverflow.com/questions/47741328/filtering-list-with-knockout.
-    // credit for sort based on alpha ordering credit: https://stackoverflow.com/questions/12718699/sorting-an-observable-array-in-knockout
-    this.filteredLocations = ko.computed(function() {
-        if (!self.query()) {
-            return self.wineryList().sort(function(l, r) {
-                return l.name() > r.name() ? 1 : -1;
-            });
-        } else {
-            return self.wineryList().filter(location => location.name().toLowerCase().indexOf(self.query().toLowerCase()) > -1).sort(function(l, r) {
-                return l.name() > r.name() ? 1 : -1;
-            });
-        }
-    });
+    // filter the winery list array and filter using ko utils
+    // credit for marker filter: https://discussions.udacity.com/t/google-map-marker-filter-issues/15244
+    self.filteredLocations = ko.computed(function() {
+        var filter = self.query().toLowerCase();
+        return ko.utils.arrayFilter(self.wineryList(), function(winery) {
+            if (winery.name().toLowerCase().indexOf(filter) > -1) {
+                if (winery.marker) winery.marker.setVisible(true);
+                return true;
+            } else {
+                winery.marker.setVisible(false);
+                return false;
+            }
+        // sort the array - credit: https://stackoverflow.com/questions/12718699/sorting-an-observable-array-in-knockout
+        }).sort(function(l, r) {
+            return l.name() > r.name() ? 1 : -1;
+        });
+    }, self);
 };
