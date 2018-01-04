@@ -158,6 +158,12 @@ function initMap() {
     ko.applyBindings(new ViewModel());
 }
 
+// fallback error handling method for map
+// Credit https://codepen.io/NKiD/pen/XNrYXa
+function mapError() {
+    $('#map').append('<hp>Sorry, it looks like Google Maps is having an issue. Please check your Internet connection or try again later.</p>');
+}
+
 
 // This function populates the infowindow when the marker is clicked.
 // Populate info based on the markers position.
